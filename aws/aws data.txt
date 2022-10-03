@@ -1,0 +1,4 @@
+gmail:	ssmartlocker@gmail.com  221013iot
+aws:	ssmartlocker@gmail.com  221013iot@
+
+Endpoint	a6gvbxmq08z2y-ats.iot.ap-southeast-1.amazonaws.com
