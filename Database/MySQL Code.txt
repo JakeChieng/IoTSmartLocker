@@ -1,0 +1,108 @@
+CREATE DATABASE Membership  default character set utf8mb4;
+USE Membership;
+
+CREATE TABLE Customers(
+    customer_id int NOT NULL AUTO_INCREMENT ,
+    customer_name char(50) NOT NULL,
+    phone int NOT NULL,
+    Address varchar(255),
+    email varchar(255),
+    PRIMARY KEY (customer_id)          
+);
+CREATE TABLE Products(
+    product_id int NOT NULL AUTO_INCREMENT,
+    product_name char(50) NOT NULL,
+    PRIMARY KEY (product_id)  
+);
+CREATE TABLE Locker(
+    locker_id int NOT NULL,
+    location varchar(50),
+	status int,
+    PRIMARY KEY (locker_id)  
+);
+CREATE TABLE Orders(
+    order_id int NOT NULL AUTO_INCREMENT ,
+	customer_id int NOT NULL,
+    order_date date NOT NULL,
+    status int,
+    payment_method char(50),
+    amount float,
+	remark varchar(255),
+    PRIMARY KEY (order_id),
+	FOREIGN KEY(customer_id) REFERENCES Customers(customer_id)		
+);
+CREATE TABLE Orderdetails(
+    order_id int NOT NULL ,
+	product_id int NOT NULL,
+	locker_id int,
+    quantityOrdered int NOT NULL,
+    status int,
+	remark varchar(255),
+    PRIMARY KEY (order_id,product_id),
+	FOREIGN KEY(order_id) REFERENCES Orders(order_id),
+	FOREIGN KEY(product_id) REFERENCES Products(product_id),
+	FOREIGN KEY(locker_id) REFERENCES Locker(locker_id)	
+);
+CREATE TABLE Customers(
+    customer_id int NOT NULL AUTO_INCREMENT ,
+    customer_name char(50) NOT NULL,
+    phone int NOT NULL,
+    Address varchar(255),
+    email varchar(255),
+    PRIMARY KEY (customer_id)          
+);
+CREATE TABLE Products(
+    product_id int NOT NULL AUTO_INCREMENT,
+    product_name char(50) NOT NULL,
+    PRIMARY KEY (product_id)  
+);
+CREATE TABLE Locker(
+    locker_id int NOT NULL,
+    location varchar(50),
+	status int,
+    PRIMARY KEY (locker_id)  
+);
+CREATE TABLE Orders(
+    order_id int NOT NULL AUTO_INCREMENT ,
+	customer_id int NOT NULL,
+    order_date date NOT NULL,
+    status int,
+    payment_method char(50),
+    amount float,
+	remark varchar(255),
+    PRIMARY KEY (order_id),
+	FOREIGN KEY(customer_id) REFERENCES Customers(customer_id)		
+);
+CREATE TABLE Orderdetails(
+    order_id int NOT NULL ,
+	product_id int NOT NULL,
+	locker_id int NOT NULL,
+    quantityOrdered int NOT NULL,
+    status int,
+	remark varchar(255),
+    PRIMARY KEY (order_id,product_id),
+	FOREIGN KEY(order_id) REFERENCES Orders(order_id),
+	FOREIGN KEY(product_id) REFERENCES Products(product_id),
+	FOREIGN KEY(locker_id) REFERENCES Locker(locker_id)	
+);
+
+# VALUES for testing
+INSERT INTO Customers VALUES
+  (1, 'james', 010389346,'kuching','ja@gmail.com'),
+  (2, 'nana', 017234567,'BDC' ,'nana@mail.com' ),
+  (3, 'gong', 012345678, 'Taman Orchid','gg@outlok.com' );
+  
+INSERT INTO Products VALUES
+  (1, 'Yu-Gi-Oh! card'),
+  (2, 'figurine');
+  
+INSERT INTO Locker VALUES
+  (1, 'back ',1),
+  (2, 'front',1);
+  
+INSERT INTO Orders VALUES
+  (1,1,'2021-02-17',1, 'boost',200,' ' );
+  
+INSERT INTO Orderdetails VALUES
+  (1,1,1,1,1,' '),
+  (1,2,1,2,1,' '),;
