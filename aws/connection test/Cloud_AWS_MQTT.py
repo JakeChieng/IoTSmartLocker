@@ -22,5 +22,5 @@ while 1:
     
     value = 200
     payload = '{"cloud message: ":'+ str(value) +'}'
-    print (payload)
+    print(payload)
     myMQTTClient.publish("cloud/data", payload, 0)
