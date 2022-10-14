@@ -1,3 +1,6 @@
+mysql -u root -p
+password:221013
+------
 CREATE DATABASE Membership  default character set utf8mb4;
 USE Membership;
 
@@ -105,4 +108,16 @@ INSERT INTO Orders VALUES
   
 INSERT INTO Orderdetails VALUES
   (1,1,1,1,1,' '),
-  (1,2,1,2,1,' '),;
+  (1,2,1,2,1,' ');
+---
+mysql -u root -p
+
+use mysql;
+
+USE Membership;
+
+  show table Orderdetails;
+  SELECT * FROM Orderdetails;
+  SELECT * FROM Orderdetails JOIN Orders ON Orderdetails.order_id=Orders.order_id;
+  SELECT * FROM Orderdetails JOIN Products ON Orderdetails.product_id=Products.product_id;
+  SELECT * FROM Orders JOIN Customers ON Orders.customer_id=Customers.customer_id;
