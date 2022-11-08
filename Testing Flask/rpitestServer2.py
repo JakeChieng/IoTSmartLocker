@@ -24,8 +24,9 @@ myMQTTClient.configureMQTTOperationTimeout(5)  # 5 sec
 myMQTTClient.connect()
 myMQTTClient.publish("rpi/info", "connected", 0)
 
-
+ser = serial.Serial(device, 9600, timeout=1)
 while 1:
     time.sleep(2)  #Delay of 2 seconds
    
     myMQTTClient.subscribe("cloud/data", 0,customCallback)
+    ser.write((message.payload).encode('utf-8'))
