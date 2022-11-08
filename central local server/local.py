@@ -1,5 +1,5 @@
 import json
-import mysql.connector
+import mariadb
 import serial
 
 from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTClient
@@ -13,7 +13,7 @@ AWS_INFO_TOPIC = "smartlocker/info"
 myMQTTClient = AWSIoTMQTTClient(SHOPNAME)
 # myMQTTClient.configureEndpoint("YOUR.ENDPOINT", 8883)
 myMQTTClient.configureEndpoint("a6gvbxmq08z2y-ats.iot.ap-southeast-1.amazonaws.com", 8883)
-myMQTTClient.configureCredentials("/home/ssmartlocker/server/cert/Amazon_Root_CA_1.pem", "/home/ssmartlocker/server/cert/bd76d6f21c0792f46f890d595e999d2443a00687a90fc056949f1ed6b2b2bef9-private.pem.key", "/home/ssmartlocker/server/cert/bd76d6f21c0792f46f890d595e999d2443a00687a90fc056949f1ed6b2b2bef9-certificate.pem.crt")
+myMQTTClient.configureCredentials("/home/ssmartlocker/server/cert/AmazonRootCA1.pem", "/home/ssmartlocker/server/cert/bd76d6f21c0792f46f890d595e999d2443a00687a90fc056949f1ed6b2b2bef9-private.pem.key", "/home/ssmartlocker/server/cert/bd76d6f21c0792f46f890d595e999d2443a00687a90fc056949f1ed6b2b2bef9-certificate.pem.crt")
 myMQTTClient.configureOfflinePublishQueueing(-1)  # Infinite offline Publish queueing
 myMQTTClient.configureDrainingFrequency(2)  # Draining: 2 Hz
 myMQTTClient.configureConnectDisconnectTimeout(10)  # 10 sec
@@ -25,30 +25,50 @@ myMQTTClient.publish(AWS_INFO_TOPIC, "connected", 0)
 
 # Compile information from DB and send to cloud as MQTT message
 def send_cloud():
-    conn = mysql.connector.connect(
+    conn = mariadb.connect(
         host="localhost",
-        user="USER",
-        password="PASSWORD",
-        database="localServerDB"
+        user="ssmartlocker",
+        password="221013iot",
+        database="shopDB"
     )
 
     # Gather information from all lockers
     query = """
-    SELECT Locker, Lot, Occupied, Closed FROM Lockers
+    SELECT locker, lot, occupied, closed FROM Lockers
     """
 
     myCursor = conn.cursor()
+    myCursor.execute(query)
     results = myCursor.fetchall()
 
-    print(results)
+    status = []
+
+    for result in results:
+        locker, lot, occupied, closed = result
+        temp = {
+            "Locker": locker,
+            "Lot": lot,
+            "Occupied": False if occupied != 0 else True,
+            "Closed": False if closed != 0 else True
+        }
+        status.append(temp)
+
+    # Pack information obtained as JSON
+    dict = {"Shop": SHOPNAME, "Status": status}
+    dict_json = json.dumps(dict)
+
+    myMQTTClient.publish(AWS_EDGE_TOPIC, dict_json, 0)
 
 
 # Message handler when receiving MQTT message from cloud
 # Identify the shop ID that matches the local server is registered as.
 # Break down commands into smaller components that matches the respective locker and lot.
 def msg_callback(client, userdata, message):
-    msg = json.loads(message.payload)
-
+    try: 
+        msg = json.loads(message.payload)
+    except json.JSONDecodeError as e:
+        print("JSON:", e)
+    
     if msg["Shop"] == SHOPNAME:
         # Unpack list of commands and send to Arduino via serial (XBee)
         commands = msg["CommandList"]
@@ -56,8 +76,9 @@ def msg_callback(client, userdata, message):
         for command in commands:
             # Send each command in JSON to XBee connected locker
             data = json.dumps(command)
-            print(data)
             ser.write(data.encode("ascii"))
+    
+    send_cloud()
 
 # Message handler when receiving serial message via XBee
 # Update information in local database
@@ -68,25 +89,40 @@ def serial_msg(dict_json):
     occupied = dict_json["Occupied"]
     closed = dict_json["Closed"]
 
-    conn = mysql.connector.connect(
+    conn = mariadb.connect(
         host="localhost",
-        user="USER",
-        password="PASSWORD",
-        database="localServerDB"
+        user="ssmartlocker",
+        password="221013iot",
+        database="shopDB"
     )
 
-    query = """UPDATE Lockers SET Occupied=%s, Closed=%s
-    WHERE Locker=%s AND Lot=%s"""
+    # Check whether status sent from microcontroller is the same as in DB
+    # If yes, then don't send mqtt and vice versa
 
-    data = (occupied, closed, locker, lot)
+    query = """SELECT occupied, closed FROM Lockers WHERE locker=%s AND lot=%s"""
+
+    data = (locker, lot)
 
     with conn:
         myCursor = conn.cursor()
         myCursor.execute(query, data)
-        conn.commit()
-        myCursor.close()
-    
-    send_cloud()
+        currentOccupied, currentClosed = myCursor.fetchone()
+
+        if currentOccupied == occupied and currentClosed == closed:
+            # Don't do anything if matching database information
+            pass
+        else:    
+            query = """UPDATE Lockers SET occupied=%s, closed=%s
+            WHERE locker=%s AND lot=%s"""
+
+            data = (occupied, closed, locker, lot)
+
+            myCursor.execute(query, data)
+            conn.commit()
+            myCursor.close()
+
+            # Send status of locker
+            send_cloud()
 
 myMQTTClient.subscribe(AWS_CLOUD_TOPIC, 0, msg_callback)
 
@@ -100,7 +136,6 @@ if __name__ == '__main__':
             data = ser.readline().decode("utf-8")
             try: 
                 dict_json = json.loads(data)
-                print(dict_json)
                 serial_msg(dict_json)
             except json.JSONDecodeError as e:
                 print("JSON:", e)

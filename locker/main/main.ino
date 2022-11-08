@@ -2,6 +2,8 @@
 #include <ArduinoJson.h>
 
 #define LOCKER "A"
+#define OCCTHRESHOLD 10
+#define CLSTHRESHOLD 10
 
 // Assign ultrasonic pins
 unsigned const int trig1 = 36;
@@ -28,15 +30,17 @@ unsigned const int IR2 = A1;
 unsigned const int IR3 = A2;
 
 // Group components based on lot
-const int lots[][7] = {{1, trig1, echo1, IR1, G1, Y1, R1}, {2, trig2, echo2, IR2, G2, Y2, R2}, {3, trig3, echo3, IR3, G3, Y3, R3}}; 
+const int lots[][7] = {
+  {1, trig1, echo1, IR1, G1, Y1, R1},
+  {2, trig2, echo2, IR2, G2, Y2, R2}, 
+  {3, trig3, echo3, IR3, G3, Y3, R3}
+}; 
 
 // Assign serial pins for servo controller
 unsigned const int ServoTx = 18;
 unsigned const int ServoRx = 19;
 
 void setup() {
-  // StaticJsonDocument doc(200);
-  
   // Set pin mode of LEDs to OUTPUT
   pinMode(G1, OUTPUT);
   pinMode(Y1, OUTPUT);
@@ -74,9 +78,7 @@ void setup() {
   Serial1.begin(9600);
   while (!Serial1) {
     // wait for serial port to servo controller to open
-  }
-  // Send initial data to central server
-  
+  }  
 }
 
 void loop() {
@@ -117,6 +119,9 @@ void loop() {
  * - check locker status (open, closed)
  */
 void check_lot(const int lot[]) {
+  StaticJsonDocument<500> doc;
+  boolean occupied;
+  boolean closed;
   // Ultrasonic sensor segment (occupancy)
   digitalWrite(lot[1], LOW);           // Clears the trigPin
   delayMicroseconds(2);
@@ -132,21 +137,34 @@ void check_lot(const int lot[]) {
   float voltage = float(raw) * (5.0 / 1023.0);
   float distance = (voltage - (206/65)) * (-325 / 6);
 
-  if (occDistance < 35) {
+  if (occDistance < OCCTHRESHOLD) {
     // Light up Red LED to signify that lot is occupied
     digitalWrite(lot[4], LOW);
     digitalWrite(lot[5], LOW);
     digitalWrite(lot[6], HIGH);
+    occupied = true;
   }
   else {
     // Light up Green LED to signify that lot is unoccupied
     digitalWrite(lot[4], HIGH);
     digitalWrite(lot[5], LOW);
     digitalWrite(lot[6], LOW);
+    occupied = false;
   }
 
-  // Create Json document
-  
+  if (distance < CLSTHRESHOLD) {
+    closed = true;
+  }
+  else {
+    closed = false;
+  }
+  // Create Json document, send it via Serial
+  doc["Locker"] = LOCKER;
+  doc["Lot"] = lot[0];
+  doc["Occupied"] = occupied;
+  doc["Closed"] = closed;
+
+  serializeJson(doc, Serial);
 }
 
 void lot_command(const int lot[], boolean lock) {
