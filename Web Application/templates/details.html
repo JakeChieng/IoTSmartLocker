@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Design</title>
+		<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+		<link rel="stylesheet" href="{{ url_for('static', filename='style/style.css') }}">
+	</head>
+	<body>
+		<div class="container">
+			<div class="row">
+				<div class="col-md-12 nopadding border">
+					<ul>
+						<a href="index"><li>Home</li></a>
+						<a href="order"><li>Orders</li></a>
+						<a href="customer"><li>Customers</li></a>
+						<a href="locker"><li>Lockers</li></a>
+					</ul>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12">
+					<h3>Order ID {{data[0]}}</h3>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12">
+					<form class="button" action="locker" method="POST">
+						<table class="table">
+							<thead>
+								<tr>
+									<th></th>
+									<th></th>
+									<th></th>
+								</tr>
+							</thead>
+							<tbody class="details">
+								<tr>
+									<th>Product ID</th>
+									<td>{{data[1]}}</td>
+									<td></td>
+								</tr>
+								<tr>
+									<th>Locker ID</th>
+									<td>{{data[2]}}</td>
+									<td></td>
+								</tr>
+								{% if data[4] == 1 %}
+									<tr>
+										<th>Change Locker</th>
+										<td>ID: 
+											<select name="locker_alloc">
+												{% for each in locker %}
+												<option value="{{each[0]}}">{{each[0]}}</option>
+												{% endfor %}
+											</select>
+										</td>
+										<td><button type="submit" name="oid" value="{{data[0]}}">Change</button></td>
+									</tr>
+								{% endif %}
+								<tr>
+									<th>Quantity</th>
+									<td>{{data[3]}}</td>
+									<td></td>
+								</tr>
+								<tr>
+									<th>Status</th>
+									<td>{{data[4]}}</td>
+									<td></td>
+								</tr>
+								<tr>
+									<th>Order Remark</th>
+									<td>{{data[5]}}</td>
+									<td></td>
+								</tr>
+							</tbody>
+						</table>
+					</form>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

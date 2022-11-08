@@ -27,8 +27,18 @@ body {
 	transform: translate(-50%, -50%);
 }
 
+.details tr th {
+	width: 20% !important;
+}
+
 p {
 	margin-top: 10px;
+}
+
+h3 {
+	margin-top: 15px;
+	margin-bottom: 0px;
+	font-weight: bold;
 }
 
 #logo {
@@ -46,18 +56,19 @@ form input{
 	margin: 5px 0;
 }
 
-.button {
-	margin: 10px 0;
-}
-
 .button button {
-	float: right;
+	width: 100px;
 	background-color: #ffffff;
 	border-radius: 8px;
-	box-shadow: 1px 1px 10px 2px #cfd0d3;
-	padding: 10px 20px;
+	box-shadow: 1px 1px 1px 2px #cfd0d3;
+	padding: 10px 10px;
 	border: none;
 	cursor: pointer;
+	float: right;
+}
+
+button:hover {
+	box-shadow: 1px 1px 5px 2px #cfd0d3;
 }
 
 ul {

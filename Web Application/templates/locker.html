@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Design</title>
+		<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+		<link rel="stylesheet" href="{{ url_for('static', filename='style/style.css') }}">
+	</head>
+	<body>
+		<div class="container">
+			<div class="row">
+				<div class="col-md-12 nopadding border">
+					<ul>
+						<a href="index"><li>Home</li></a>
+						<a href="order"><li>Orders</li></a>
+						<a href="customer"><li>Customers</li></a>
+						<a href="locker"><li>Lockers</li></a>
+					</ul>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12">
+					<table class="table">
+						<thead>
+							<tr>
+								<th scope="col">Locker ID</th>
+								<th scope="col">Locker</th>
+								<th scope="col">Locker Lot</th>
+								<th scope="col">Occupied</th>
+								<th scope="col">Closed</th>
+								<th scope="col">Shop</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for item in data %}
+							<tr>
+								<td>{{item[0]}}</td>
+								<td>{{item[1]}}</td>
+								<td>{{item[2]}}</td>
+								<td>{{item[3]}}</td>
+								<td>{{item[4]}}</td>
+								<td>{{item[5]}}</td>
+							</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
