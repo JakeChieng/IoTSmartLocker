@@ -3,3 +3,7 @@ Username: ssmartlocker
 Password: 221013iot
 
 ----
+
+Database on Raspberry Pi:
+Username: ssmartlocker
+Password: 221013iot
