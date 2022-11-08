@@ -1,17 +1,29 @@
-servertest.ino
+//servertest.ino
 #include <Servo.h> // servo library
 #include <ArduinoJson.h>
 
 int defaultPos = 0; //default position for servo
 int pos = 90;
 
-Servo myservo;
-
+// Assign RGB LED pins
+unsigned const int G1 = 11;
+unsigned const int Y1 = 10;
+unsigned const int R1 = 9;
 void setup()
 {
   Serial.begin(9600);                                //  Sensor Buart Rate
-  myservo.attach(9);                                   //  Servo PIN D9
-  DynamicJsonDocument doc(1024); 
+
+    // Set pin mode of LEDs to OUTPUT
+  pinMode(G1, OUTPUT);
+  pinMode(Y1, OUTPUT);
+  pinMode(R1, OUTPUT);
+  
+    // Start serial for XBee (TX0, RX0 = 1, 0)
+  Serial.begin(9600);
+
+  while (!Serial) {
+    // wait for serial port to XBee to open
+  }
 }
 void loop()
 {
@@ -31,14 +43,18 @@ void loop()
 
   str = rxString.substring(0, 0);
 
-  int servo = String(str).toInt();// to integer
+  int led = String(str).toInt();// to integer
 
-  if (servo == 1) {
-     myservo.write(pos);              // tell servo to go to position in variable 'pos'
+  if (led == 1) { //led on
+    digitalWrite(G1, HIGH);
+    digitalWrite(Y1, HIGH);
+    digitalWrite(R1, HIGH);
      delay(3000);
    } 
    else  {
-    myservo.write(defaultPos);
+    digitalWrite(G1, LOW);
+    digitalWrite(Y1, LOW);
+    digitalWrite(R1, LOW);
   }
  }
 

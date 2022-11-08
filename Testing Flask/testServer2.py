@@ -1,46 +1,52 @@
 testServer2.py
 
-import serial
 from flask import Flask,  request,render_template 
-import threading
 
 app = Flask(__name__)
 
-device = '/dev/ttyUSB0' 
+msg = { 
+0: {'title' : 'led on', 'message' : 'led off'}
+}
+
+import time  #Import time library
+from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTClient
+
+
+# AWS IoT certificate based connection
+myMQTTClient = AWSIoTMQTTClient("MyCloudComputer")
+# myMQTTClient.configureEndpoint("YOUR.ENDPOINT", 8883)
+myMQTTClient.configureEndpoint("a6gvbxmq08z2y-ats.iot.ap-southeast-1.amazonaws.com", 8883)#v
+myMQTTClient.configureCredentials("/home/ubuntu/certEc2/AmazonRootCA1.pem", "/home/ubuntu/certEc2/0f2deb2a9e43840ae73fb949f9ed54e437cac1f3d45323efe2fcfcee4692afe4-private.pem.key", "/home/ubuntu/certEc2/0f2deb2a9e43840ae73fb949f9ed54e437cac1f3d45323efe2fcfcee4692afe4-certificate.pem.crt")#v
+myMQTTClient.configureOfflinePublishQueueing(-1)  # Infinite offline Publish queueing
+myMQTTClient.configureDrainingFrequency(2)  # Draining: 2 Hz
+myMQTTClient.configureConnectDisconnectTimeout(10)  # 10 sec
+myMQTTClient.configureMQTTOperationTimeout(5)  # 5 sec
+
+#connect and publish
+myMQTTClient.connect()
+myMQTTClient.publish("cloud/info", "connected", 0)
              
 @app.route('/')
 def testServer():
-    global p
-    p = threading.Thread(target=sqlUp, args=(10000000,))
-    p.daemon = True
-    p.start()
-
+	templateData = { 'TheSet' : msg }
     return render_template('testServer.html', **templateData)
     
 @app.route("/<action>") 
 def action(action):
-    msg1=''
-    waterpump ='3'
-    if action == 'action1' : 
-        waterpump='1'
-        msg1='servo TURNed 90 degree' 
-    if action == 'action2' : 
-        waterpump='0'
-        msg1='servo TURNed back to 0 degree'  
-
-    # This data will be sent to arduino
-    ser.write((servo).encode('utf-8'))
+    led='3'
+    if action == 'action1':
+		led='1' #led on
+	if action == 'action2':
+		led='0' #led off
+        
+    payload = '{"cloud message: ":'+ led +'}'
+    print(payload)
+    myMQTTClient.publish("cloud/data", payload, 0)
     
-    templateData = {
-        'msg'  : msg1
-        }
-    # Pass the template data into the template act.html and return it 
+	templateData = { 'TheSet' : msg }
+
     return render_template('act.html', **templateData)
 
 if __name__ == "__main__" :
-    ser = serial.Serial(device, 9600, timeout=1)
-    ser.flush() 
-    app.run(host='0.0.0.0', port = 8080, debug = False)
-
-
+	app.run(host='0.0.0.0',port=8080,debug=False)
 
