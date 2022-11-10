@@ -71,23 +71,27 @@ void setup() {
   while (!Serial) {
     // wait for serial port to XBee to open
   }
-
-  on_off_motor(0,1);
   
   // Start serial for servo controller (TX1, RX1 = 18, 19)
   Serial1.begin(9600);
   while (!Serial1) {
     // wait for serial port to servo controller to open
-  }  
+  }
+
+  on_off_motor(0,1);
+  // Lock all lockers
+  set_ch_pos_spd(lots[0][0], 4000, 80);
+  set_ch_pos_spd(lots[1][0], 4000, 80);
+  set_ch_pos_spd(lots[2][0], 4000, 80);
 }
 
 void loop() {
   check_lot(lots[0]);
-  delay(1000);
+  delay(5000);
   check_lot(lots[1]);
-  delay(1000);
-  check_lot(lots[3]);
-  delay(1000);
+  delay(5000);
+  check_lot(lots[2]);
+  delay(5000);
   
   // Receive json input from central server
   if (Serial.available() > 0) {
@@ -175,7 +179,7 @@ void lot_command(const int lot[], boolean lock) {
     digitalWrite(lot[6], LOW);
 
     // set servo to be open position 
-    set_ch_pos_spd(lot[0], 5000, 50);
+    set_ch_pos_spd(lot[0], 0, 0);
   }
   else {
     boolean closed = false;
@@ -186,13 +190,13 @@ void lot_command(const int lot[], boolean lock) {
       float voltage = float(raw) * (5.0 / 1023.0);
       float distance = (voltage - (206/65)) * (-325 / 6);
 
-      if (distance < 30) {
+      if (distance < CLSTHRESHOLD) {
         closed = true;
       }
     } while (closed == false);
 
     // set servo to be close position 
-    set_ch_pos_spd(lot[0], 0, 50);
+    set_ch_pos_spd(lot[0], 4000, 0);
   }
 }
 
@@ -206,6 +210,8 @@ void on_off_motor(unsigned char channel, unsigned char on) {
 void set_ch_pos_spd(unsigned char channel, unsigned int position, unsigned char velocity)
 {
  /*****Position and Speed Command*****
+  * position: 0-8000
+  * velocity: 0-100, 0 is faster than 100
  - 4 bytes involved
  - 1st byte: Start byte + Servo motor channel
    eg: 
