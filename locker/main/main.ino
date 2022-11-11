@@ -86,13 +86,6 @@ void setup() {
 }
 
 void loop() {
-  check_lot(lots[0]);
-  delay(5000);
-  check_lot(lots[1]);
-  delay(5000);
-  check_lot(lots[2]);
-  delay(5000);
-  
   // Receive json input from central server
   if (Serial.available() > 0) {
     StaticJsonDocument<500> doc;
@@ -118,14 +111,10 @@ void loop() {
   }
 }
 
-/* Check status of lot
- * - check occupancy (occupiend, vacant)
- * - check locker status (open, closed)
- */
-void check_lot(const int lot[]) {
-  StaticJsonDocument<500> doc;
+void check_occupied(const int lot[]) {
+  StaticJsonDocument doc(500);
   boolean occupied;
-  boolean closed;
+  
   // Ultrasonic sensor segment (occupancy)
   digitalWrite(lot[1], LOW);           // Clears the trigPin
   delayMicroseconds(2);
@@ -135,11 +124,6 @@ void check_lot(const int lot[]) {
 
   long duration = pulseIn(lot[2], HIGH);    // Reads the echoPin, returns the sound wave travel time in microseconds
   int occDistance = duration * 0.034 / 2;    // Calculating the distance
-
-  // Long range IR sensor (locker status)
-  int raw = analogRead(lot[3]);
-  float voltage = float(raw) * (5.0 / 1023.0);
-  float distance = (voltage - (206/65)) * (-325 / 6);
 
   if (occDistance < OCCTHRESHOLD) {
     // Light up Red LED to signify that lot is occupied
@@ -156,48 +140,45 @@ void check_lot(const int lot[]) {
     occupied = false;
   }
 
-  if (distance < CLSTHRESHOLD) {
-    closed = true;
-  }
-  else {
-    closed = false;
-  }
   // Create Json document, send it via Serial
   doc["Locker"] = LOCKER;
   doc["Lot"] = lot[0];
   doc["Occupied"] = occupied;
-  doc["Closed"] = closed;
 
   serializeJson(doc, Serial);
+  Serial.println();
 }
 
-void lot_command(const int lot[], boolean lock) {
-  if (!lock) {
-    // Light up yellow LED
-    digitalWrite(lot[4], LOW);
+void unlock_lot(const int lot[]) {
+  boolean closed = false;
+  
+  // set servo to be open position 
+  set_ch_pos_spd(lot[0], 0, 0);
+  
+  do {
+    digitalWrite(lot[4], HIGH);
     digitalWrite(lot[5], HIGH);
+    digitalWrite(lot[6], HIGH);
+    delay(1000)
+    digitalWrite(lot[4], LOW);
+    digitalWrite(lot[5], LOW);
     digitalWrite(lot[6], LOW);
+    delay(1000);
 
-    // set servo to be open position 
-    set_ch_pos_spd(lot[0], 0, 0);
-  }
-  else {
-    boolean closed = false;
-    do {
-      // check if door is closed
-      // Long range IR sensor (locker status)
-      int raw = analogRead(lot[3]);
-      float voltage = float(raw) * (5.0 / 1023.0);
-      float distance = (voltage - (206/65)) * (-325 / 6);
+    // check if door is closed
+    // Long range IR sensor (locker status)
+    int raw = analogRead(lot[3]);
+    float voltage = float(raw) * (5.0 / 1023.0);
+    float distance = (voltage - (206/65)) * (-325 / 6);
 
-      if (distance < CLSTHRESHOLD) {
-        closed = true;
-      }
-    } while (closed == false);
+    if (distance < CLSTHRESHOLD) {
+      closed = true;
+    }
+  } while (!closed)
 
-    // set servo to be close position 
-    set_ch_pos_spd(lot[0], 4000, 0);
-  }
+  // set servo to be open position 
+  set_ch_pos_spd(lot[0], 4000, 0);
+  check_occupied(lot);
 }
 
 void on_off_motor(unsigned char channel, unsigned char on) {

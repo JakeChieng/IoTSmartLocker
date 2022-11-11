@@ -66,17 +66,17 @@ def send_cloud():
 def msg_callback(client, userdata, message):
     try: 
         msg = json.loads(message.payload)
+
+        if msg["Shop"] == SHOPNAME:
+            # Unpack list of commands and send to Arduino via serial (XBee)
+            commands = msg["CommandList"]
+
+            for command in commands:
+                # Send each command in JSON to XBee connected locker
+                data = json.dumps(command)
+                ser.write(data.encode("ascii"))
     except json.JSONDecodeError as e:
         print("JSON:", e)
-    
-    if msg["Shop"] == SHOPNAME:
-        # Unpack list of commands and send to Arduino via serial (XBee)
-        commands = msg["CommandList"]
-
-        for command in commands:
-            # Send each command in JSON to XBee connected locker
-            data = json.dumps(command)
-            ser.write(data.encode("ascii"))
     
     send_cloud()
 
