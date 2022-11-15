@@ -25,8 +25,8 @@ unsigned const int R3 = 3;
 
 // Assign limit switch pins
 unsigned const int ls1 = 22;
-unsigned const int ls2 = 24;
-unsigned const int ls3 = 26;
+unsigned const int ls2 = 23;
+unsigned const int ls3 = 25;
 
 // Group components based on lot
 const int lots[][7] = {
@@ -61,9 +61,9 @@ void setup() {
   pinMode(echo3, INPUT);
 
   // Set pin mode of limit switch pins to INPUT_PULLUP
-  pinMode(ls1, INPUT_PULLUP);
-  pinMode(ls2, INPUT_PULLUP);
-  pinMode(ls3, INPUT_PULLUP);
+  pinMode(ls1, INPUT);
+  pinMode(ls2, INPUT);
+  pinMode(ls3, INPUT);
   
   // Set pin mode of servo tx pin to OUTPUT
   // Set pin mode of servo rx pin to INPUT
@@ -83,11 +83,15 @@ void setup() {
   }
 
   on_off_motor(0,1);
+  set_ch_pos_spd(lots[0][0], 8000, 80);
+  set_ch_pos_spd(lots[1][0], 8000, 80);
+  set_ch_pos_spd(lots[2][0], 8000, 80);
   for (int i = 0; i < 3; i++) {
     boolean closed =  false;
     do {
       unlock_blink(lots[i]);
       closed = check_lock(lots[i]);
+      delay(300);
     } while (!closed);
     set_ch_pos_spd(lots[i][0], 4000, 80);
     check_occupied(lots[i]);
@@ -120,6 +124,7 @@ void check_occupied(const int lot[]) {
 
   long duration = pulseIn(lot[2], HIGH);    // Reads the echoPin, returns the sound wave travel time in microseconds
   int occDistance = duration * 0.034 / 2;    // Calculating the distance
+  Serial.println(occDistance);
 
   if (occDistance < OCCTHRESHOLD) {
     // Light up Red LED to signify that lot is occupied
@@ -174,7 +179,8 @@ void unlock_lot(const int lot[]) {
 
 boolean check_lock(const int lot[]) {
   // Check if door is closed
-  if (digitalRead(lot[3]) == HIGH) {
+  Serial.println(digitalRead(lot[3]));
+  if (digitalRead(lot[3]) == LOW) {
     return true;
   }
   else {
