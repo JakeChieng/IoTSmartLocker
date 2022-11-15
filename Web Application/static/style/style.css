@@ -31,6 +31,10 @@ body {
 	width: 20% !important;
 }
 
+.form tr th {
+	width: 20% !important;
+}
+
 p {
 	margin-top: 10px;
 }

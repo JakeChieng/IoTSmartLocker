@@ -5,12 +5,13 @@ CREATE DATABASE Membership  default character set utf8mb4;
 USE Membership;
 
 CREATE TABLE Customers(
-    customer_id int NOT NULL AUTO_INCREMENT ,
-    customer_name char(50) NOT NULL,
-    phone int NOT NULL,
-    Address varchar(255),
-    email varchar(255),
-    PRIMARY KEY (customer_id)          
+	customer_id int NOT NULL AUTO_INCREMENT ,
+	customer_name char(50) NOT NULL,
+	phone int NOT NULL,
+	address varchar(255),
+	email varchar(100) NOT NULL UNIQUE,
+	password varchar(100) NOT NULL,
+	PRIMARY KEY (customer_id)          
 );
 CREATE TABLE Products(
     product_id int NOT NULL AUTO_INCREMENT,
@@ -53,9 +54,9 @@ CREATE TABLE Orderdetails(
 
 # VALUES for testing
 INSERT INTO Customers VALUES
-  (1, 'james', 010389346,'kuching','ja@gmail.com'),
-  (2, 'nana', 017234567,'BDC' ,'nana@mail.com' ),
-  (3, 'gong', 012345678, 'Taman Orchid','gg@outlok.com' );
+  (1, 'james', 010389346,'kuching','ja@gmail.com',"b'\xfc\xcbm\x83C\x13[e'"),
+  (2, 'nana', 017234567,'BDC' ,'nana@mail.com',"b'D\n\xa5\xd3/\xecVv\xfa\xf7{\x7f['" ),
+  (3, 'gong', 012345678, 'Taman Orchid','gg@outlook.com',"b'\xfc\xcbm\x83C\x13[e'" );
   
 INSERT INTO Products VALUES
   (1, 'Yu-Gi-Oh! card'),
@@ -70,16 +71,18 @@ INSERT INTO Orders VALUES
 INSERT INTO Orderdetails VALUES
   (1,1,1,1,1,' '),
   (1,2,1,2,1,' ');
----
-mysql -u root -p
+-------
+SELECT password FROM Customers
+WHERE email = 'ja@gmail.com';
+
+DROP DATABASE Membership;
 
 use mysql;
 
-USE Membership;
 show tables;
 
   show table Orderdetails;
-  SELECT * FROM Orderdetails;
+  SELECT * FROM Customers;
   SELECT * FROM Orderdetails JOIN Orders ON Orderdetails.order_id=Orders.order_id;
   SELECT * FROM Orderdetails JOIN Products ON Orderdetails.product_id=Products.product_id;
   SELECT * FROM Orders JOIN Customers ON Orders.customer_id=Customers.customer_id;

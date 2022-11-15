@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Design</title>
+		<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+		<link rel="stylesheet" href="{{ url_for('static', filename='style/style.css') }}">
+	</head>
+	<body>
+		<div class="container">
+			<div class="row">
+				<div class="col-md-12 nopadding border">
+					<ul>
+						<a href="index"><li>Home</li></a>
+						<a href="order_form"><li>Place Order</li></a>
+						<a href="customer_orders"><li>Orders</li></a>
+					</ul>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12">
+					<table class="table">
+						<thead>
+							<tr>
+								<th>Product</th>
+								<th>Locker</th>
+								<th>Quantity</th>
+								<th>Remark</th>
+								<th>Order Date</th>
+								<th>Status</th>
+								<th>Payment Method</th>
+								<th>Amount</th>
+								<th></th>
+								<th></th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>{{name}}</td>
+							{% for detail in order %}
+								<td>{{detail[2]}}</td>
+								<td>{{detail[3]}}</td>
+								<td>{{detail[5]}}</td>
+							{% endfor %}
+							{% for item in data %}
+								<td>{{item[2]}}</td>
+								<td>{{item[3]}}</td>
+								<td>{{item[4]}}</td>
+								<td>{{item[5]}}</td>
+								<td>
+									{% if item[3] == 1 %}
+									<!-- implement payment method gateway when done -->
+										<form class="button" action="pay_for" method="POST">
+											<button type="submit" name="ost" value="{{item[0]}}">Pay</button>
+										</form>
+									{% endif %}
+								</td>
+								<td>
+									{% if item[3] == 2 %}
+									<!-- might implement direct device communication with raspi -->
+										<form class="button" action="open_locker" method="POST">
+											<button type="submit" name="pup" value="{{item[0]}}">Pick Up</button>
+										</form>
+									{% endif %}
+								</td>
+							{% endfor %}
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

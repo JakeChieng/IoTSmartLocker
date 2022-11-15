@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Design</title>
+		<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+		<link rel="stylesheet" href="{{ url_for('static', filename='style/style.css') }}">
+	</head>
+	<body>
+		<div class="container">
+			<div class="row">
+				<div class="col-md-12 nopadding border">
+					<ul>
+						<a href="index"><li>Home</li></a>
+						<a href="order_form"><li>Place Order</li></a>
+						<a href="customer_orders"><li>Orders</li></a>
+					</ul>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12">
+					<form class="padding" action="place_order" method="POST">
+					<!-- quantity, remark, order list drop-down-->
+					<!-- payment method -->
+						<table>
+							<tbody class="form">
+								<tr>
+									<th><label for="qty">Quantity: </label></th>
+									<td><input type="number" name="qty" /></td>
+								</tr>
+								<tr>
+									<th><label for="remark">Remark: </label></th>
+									<td><textarea name="remark" rows="5" cols="50"></textarea></td>
+								</tr>
+								<tr>
+									<th><label for="item">Item: </label></th>
+									<td>
+										<select name="item">
+											{% for item in data %}
+											<option value="{{item[0]}}">{{item[0]}}</option>
+											<option value="{{item[1]}}">{{item[1]}}</option>
+											{% endfor %}
+										</select>
+									</td>
+								</tr>
+								<tr>
+									<th><label for="payment_method">Payment Method: </label></th>
+									<td>
+										<select name="payment_method">
+											<option value="boost">Boost</option>
+											<option value="spay">Sarawak Pay</option>
+										</select>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</form>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
