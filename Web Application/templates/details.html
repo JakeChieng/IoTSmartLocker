@@ -24,57 +24,64 @@
 			</div>
 			<div class="row">
 				<div class="col-md-12">
-					<form class="button" action="locker" method="POST">
-						<table class="table">
-							<thead>
+					<table class="table">
+						<thead>
+							<tr>
+								<th></th>
+								<th></th>
+								<th></th>
+							</tr>
+						</thead>
+						<tbody class="details">
+							<tr>
+								<th>Product ID</th>
+								<td>{{data[1]}}</td>
+								<td></td>
+							</tr>
+							<tr>
+								<th>Locker ID</th>
+								<td>{{data[2]}}</td>
+								<td></td>
+							</tr>
+							{% if data[4] == 1 %}		
+							<form class="button" action="locker" method="POST">
 								<tr>
-									<th></th>
-									<th></th>
-									<th></th>
+									<th>Change Locker</th>
+									<td>ID: 
+										<select name="locker_alloc">
+											{% for each in locker %}
+											<option value="{{each[0]}}">{{each[0]}}</option>
+											{% endfor %}
+										</select>
+									</td>
+									<td><button type="submit" name="oid" value="{{data[0]}}">Change</button></td>
 								</tr>
-							</thead>
-							<tbody class="details">
-								<tr>
-									<th>Product ID</th>
-									<td>{{data[1]}}</td>
-									<td></td>
-								</tr>
-								<tr>
-									<th>Locker ID</th>
-									<td>{{data[2]}}</td>
-									<td></td>
-								</tr>
-								{% if data[4] == 1 %}
-									<tr>
-										<th>Change Locker</th>
-										<td>ID: 
-											<select name="locker_alloc">
-												{% for each in locker %}
-												<option value="{{each[0]}}">{{each[0]}}</option>
-												{% endfor %}
-											</select>
-										</td>
-										<td><button type="submit" name="oid" value="{{data[0]}}">Change</button></td>
-									</tr>
-								{% endif %}
-								<tr>
-									<th>Quantity</th>
-									<td>{{data[3]}}</td>
-									<td></td>
-								</tr>
-								<tr>
-									<th>Status</th>
-									<td>{{data[4]}}</td>
-									<td></td>
-								</tr>
-								<tr>
-									<th>Order Remark</th>
-									<td>{{data[5]}}</td>
-									<td></td>
-								</tr>
-							</tbody>
-						</table>
-					</form>
+							</form>
+							{% endif %}
+							<tr>
+								<th>Quantity</th>
+								<td>{{data[3]}}</td>
+								<td></td>
+							</tr>
+							<tr>
+								<th>Status</th>
+								<td>{{data[4]}}</td>
+								<td></td>
+							</tr>
+							<form class="button" action="amount" method="POST">
+							<tr>
+								<th><label for="amt">Amount: </label></th>
+								<td><input type="number" name="amt" value="{{order[5]}}"/></td>
+								<td><button type="submit" name="amt">Change</button></td>
+							</tr>
+							</form>
+							<tr>
+								<th>Order Remark</th>
+								<td>{{data[5]}}</td>
+								<td></td>
+							</tr>
+						</tbody>
+					</table>
 				</div>
 			</div>
 		</div>

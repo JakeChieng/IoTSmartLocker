@@ -1,0 +1,246 @@
+#include <iostream>
+#include "Player.h"
+
+Player::Player(int pID, int pHP, int maximumHP, int pStrength, int pDefense, int pGold, int currentWave, int currentLevel, int currentXP, Item* eWeapon, Item* eArmor, int tStrength, int tDefense, Iterator* pInventory)
+{
+	ID = pID;
+	HP = pHP;
+	maxHP = maximumHP;
+	strength = pStrength;
+	defense = pDefense;
+	gold = pGold;
+	wave = currentWave;
+	level = currentLevel;
+	XP = currentXP;
+	equippedWeapon = eWeapon;
+	equippedArmor = eArmor;
+	totalStrength = tStrength;
+	totalDefense = tDefense;
+	playerInventory = pInventory;
+}
+
+Player::Player()
+{
+	ID = 0;
+	HP = 0;
+	maxHP = 0;
+	strength = 0;
+	defense = 0;
+	gold = 0;
+	wave = 0;
+	level = 0;
+	XP = 0;
+	equippedWeapon = 0;
+	equippedArmor = 0;
+	totalStrength = 0;
+	totalDefense = 0;
+	playerInventory = 0;
+}
+
+Player::~Player() {}
+
+int Player::getWave() const
+{
+	return wave;
+}
+
+int Player::getLevel() const
+{
+	return level;
+}
+
+int Player::getXP() const
+{
+	return XP;
+}
+
+Item* Player::getEquippedWeapon() const
+{
+	return equippedWeapon;
+}
+
+Item* Player::getEquippedArmor() const
+{
+	return equippedArmor;
+}
+
+int Player::getTotalStrength() const
+{
+	return totalStrength;
+}
+
+int Player::getTotalDefense() const
+{
+	return totalDefense;
+}
+
+Iterator* Player::getInventory() const
+{
+	return playerInventory;
+}
+
+void Player::setWave(int w)
+{
+	wave = w;
+}
+
+void Player::setLevel(int l)
+{
+	level = l;
+}
+
+void Player::setXP(int xp)
+{
+	XP = xp;
+}
+
+void Player::setEquippedWeapon(Item* weapon)
+{
+	equippedWeapon = weapon;
+}
+
+void Player::setEquippedArmor(Item* armor)
+{
+	equippedArmor = armor;
+}
+
+void Player::setTotalStrength(int s)
+{
+	totalStrength = s;
+}
+
+void Player::setTotalDefense(int d)
+{
+	totalDefense = d;
+}
+
+void Player::setInventory(Iterator* inventory)
+{
+	playerInventory = inventory;
+}
+
+void Player::advance()
+{
+	++wave;
+}
+
+void Player::rest()
+{
+	HP = maxHP;
+	SP = maxSP;
+}
+
+void Player::flee()
+{
+	//game end
+}
+
+void Player::equip(Item* item)
+{
+	if (item->getItemType() == "weapon")
+	{
+		equippedWeapon = item;
+		totalStrength = strength + equippedWeapon->getItemPoints();
+	}
+	else if (item->getItemType() == "armor")
+	{
+		equippedArmor = item;
+		totalDefense = defense + equippedArmor->getItemPoints();
+		HP = maxHP + totalDefense;
+	}
+}
+
+void Player::showInventory()
+{
+	Inventory* temp = playerInventory->getI();
+	cout << "Player Inventory:" << endl;
+	while (playerInventory != NULL)
+	{
+		Item* test = playerInventory->getI()->getItem();
+		if (test != NULL)
+		{
+			cout << playerInventory->getI()->getItem()->getItemName() << ": " << playerInventory->getI()->getItem()->getItemDesc() << endl;
+			playerInventory++;
+		}
+		else
+		{
+			cout << "Empty slot." << endl;
+			playerInventory++;
+		}
+	}
+	playerInventory->setI(temp);
+}
+
+void Player::storeItem(Item* item)
+{
+	Inventory* temp = playerInventory->getI();
+	while (playerInventory->getI() != NULL)
+	{
+		if (playerInventory->getI()->getItem() != NULL)
+		{
+			playerInventory++;
+		}
+		else
+		{
+			playerInventory->getI()->setItem(item);
+			break;
+		}
+	}
+	playerInventory->setI(temp);
+}
+
+void Player::status()
+{
+	cout << "ID: " << ID << endl;
+	cout << "Wave: " << wave << endl;
+	cout << "Level: " << level << endl;
+	cout << "XP: " << XP << "/" << (100 * level) << endl;
+	cout << "HP: " << HP << "/" << maxHP << " (+" << totalDefense << ")" << endl;
+	cout << "SP: " << SP << "/" << maxSP << endl;
+	cout << "Gold: " << gold << endl;
+}
+
+#pragma once
+#include <iostream>
+#include "Entity.h"
+#include "Inventory.h"
+
+class Player : public Entity
+{
+private:
+	int wave, level, XP, totalStrength, totalDefense;
+	Item* equippedWeapon;
+	Item* equippedArmor;
+	Iterator* playerInventory;
+public:
+	Player(int pID, int pHP, int maximumHP, int pStrength, int pDefense, int pGold, int currentWave, int currentLevel, int currentXP, Item* eWeapon, Item* eArmor, int tStrength, int tDefense, Iterator* pInventory);
+	Player();
+
+	~Player();
+
+	int getWave() const;
+	int getLevel() const;
+	int getXP() const;
+	Item* getEquippedWeapon() const;
+	Item* getEquippedArmor() const;
+	int getTotalStrength() const;
+	int getTotalDefense() const;
+	Iterator* getInventory() const;
+
+	void setWave(int w);
+	void setLevel(int l);
+	void setXP(int xp);
+	void setEquippedWeapon(Item* weapon);
+	void setEquippedArmor(Item* armor);
+	void setTotalStrength(int s);
+	void setTotalDefense(int d);
+	void setInventory(Iterator* inventory);
+
+	void advance();
+	void rest();
+	void flee();
+	void equip(Item* item);
+	void showInventory();
+	void storeItem(Item* item);
+	void status();
+};
