@@ -3,7 +3,6 @@
 
 #define LOCKER "A"
 #define OCCTHRESHOLD 10
-#define CLSTHRESHOLD 10
 
 // Assign ultrasonic pins
 unsigned const int trig1 = 36;
@@ -24,16 +23,16 @@ unsigned const int G3 = 5;
 unsigned const int Y3 = 4;
 unsigned const int R3 = 3;
 
-// Assign IR range sensor
-unsigned const int IR1 = A0;
-unsigned const int IR2 = A1;
-unsigned const int IR3 = A2;
+// Assign limit switch pins
+unsigned const int ls1 = 22;
+unsigned const int ls2 = 24;
+unsigned const int ls3 = 26;
 
 // Group components based on lot
 const int lots[][7] = {
-  {1, trig1, echo1, IR1, G1, Y1, R1},
-  {2, trig2, echo2, IR2, G2, Y2, R2}, 
-  {3, trig3, echo3, IR3, G3, Y3, R3}
+  {1, trig1, echo1, ls1, G1, Y1, R1},
+  {2, trig2, echo2, ls2, G2, Y2, R2}, 
+  {3, trig3, echo3, ls3, G3, Y3, R3}
 }; 
 
 // Assign serial pins for servo controller
@@ -60,6 +59,11 @@ void setup() {
   pinMode(echo2, INPUT);
   pinMode(trig3, OUTPUT);             
   pinMode(echo3, INPUT);
+
+  // Set pin mode of limit switch pins to INPUT_PULLUP
+  pinMode(ls1, INPUT_PULLUP);
+  pinMode(ls2, INPUT_PULLUP);
+  pinMode(ls3, INPUT_PULLUP);
   
   // Set pin mode of servo tx pin to OUTPUT
   // Set pin mode of servo rx pin to INPUT
@@ -79,10 +83,15 @@ void setup() {
   }
 
   on_off_motor(0,1);
-  // Lock all lockers
-  set_ch_pos_spd(lots[0][0], 4000, 80);
-  set_ch_pos_spd(lots[1][0], 4000, 80);
-  set_ch_pos_spd(lots[2][0], 4000, 80);
+  for (int i = 0; i < 3; i++) {
+    boolean closed =  false;
+    do {
+      unlock_blink(lots[i]);
+      closed = check_lock(lots[i]);
+    } while (!closed);
+    set_ch_pos_spd(lots[i][0], 4000, 80);
+    check_occupied(lots[i]);
+  }
 }
 
 void loop() {
@@ -92,27 +101,14 @@ void loop() {
     deserializeJson(doc, Serial);
 
     if (doc["Locker"] == LOCKER) {
-      // Run command function
-      if (doc["Command"] == "Lock") {
-        for (int i = 0; i < 3; i++) {
-          if (doc["Lot"] == lots[i][0]) {
-            lot_command(lots[i], true); 
-          }
-        }
-      } 
-      else {
-        for (int i = 0; i < 3; i++) {
-          if (doc["Lot"] == lots[i][0]) {
-            lot_command(lots[i], false); 
-          }
-        }
-      }
+      unlock_lot(lots[int(doc["Lot"]) - 1]);
     }
   }
 }
 
+
 void check_occupied(const int lot[]) {
-  StaticJsonDocument doc(500);
+  StaticJsonDocument<500> doc;
   boolean occupied;
   
   // Ultrasonic sensor segment (occupancy)
@@ -149,6 +145,17 @@ void check_occupied(const int lot[]) {
   Serial.println();
 }
 
+void unlock_blink(const int lot[]) {
+  digitalWrite(lot[4], HIGH);
+  digitalWrite(lot[5], HIGH);
+  digitalWrite(lot[6], HIGH);
+  delay(1000);
+  digitalWrite(lot[4], LOW);
+  digitalWrite(lot[5], LOW);
+  digitalWrite(lot[6], LOW);
+  delay(1000);
+}
+
 void unlock_lot(const int lot[]) {
   boolean closed = false;
   
@@ -156,29 +163,23 @@ void unlock_lot(const int lot[]) {
   set_ch_pos_spd(lot[0], 0, 0);
   
   do {
-    digitalWrite(lot[4], HIGH);
-    digitalWrite(lot[5], HIGH);
-    digitalWrite(lot[6], HIGH);
-    delay(1000)
-    digitalWrite(lot[4], LOW);
-    digitalWrite(lot[5], LOW);
-    digitalWrite(lot[6], LOW);
-    delay(1000);
+    unlock_blink(lot);
+    closed = check_lock(lot);
+  } while (!closed);
 
-    // check if door is closed
-    // Long range IR sensor (locker status)
-    int raw = analogRead(lot[3]);
-    float voltage = float(raw) * (5.0 / 1023.0);
-    float distance = (voltage - (206/65)) * (-325 / 6);
-
-    if (distance < CLSTHRESHOLD) {
-      closed = true;
-    }
-  } while (!closed)
-
-  // set servo to be open position 
+  // set servo to be closed position 
   set_ch_pos_spd(lot[0], 4000, 0);
   check_occupied(lot);
+}
+
+boolean check_lock(const int lot[]) {
+  // Check if door is closed
+  if (digitalRead(lot[3]) == HIGH) {
+    return true;
+  }
+  else {
+    return false;
+  }
 }
 
 void on_off_motor(unsigned char channel, unsigned char on) {
