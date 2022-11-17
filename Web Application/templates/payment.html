@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Design</title>
+		<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+		<link rel="stylesheet" href="{{ url_for('static', filename='style/style.css') }}">
+	</head>
+	<body>
+		<div class="container">
+			<div class="row">
+				<div class="col-md-12 nopadding border">
+					<ul>
+						<a href="index"><li>Home</li></a>
+						<a href="order_form"><li>Place Order</li></a>
+						<a href="customer_orders"><li>Orders</li></a>
+					</ul>
+				</div>
+			</div>
+			<div>
+			<h1>Boost</h1>
+			<h2>Scan here to pay!</h2>
+			<img src="{{ url_for('static', filename='img/boostred.jpeg') }}" alt="Neko Neko Nyaa boost qr code" />
+			</div>
+	</body>
+</html>
