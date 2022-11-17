@@ -13,15 +13,15 @@ unsigned const int trig3 = 44;
 unsigned const int echo3 = 45;
 
 // Assign RGB LED pins
-unsigned const int G1 = 11;
-unsigned const int Y1 = 10;
-unsigned const int R1 = 9;
-unsigned const int G2 = 8;
+unsigned const int G1 = 3;
+unsigned const int Y1 = 4;
+unsigned const int R1 = 5;
+unsigned const int G2 = 6;
 unsigned const int Y2 = 7;
-unsigned const int R2 = 6;
-unsigned const int G3 = 5;
-unsigned const int Y3 = 4;
-unsigned const int R3 = 3;
+unsigned const int R2 = 8;
+unsigned const int G3 = 9;
+unsigned const int Y3 = 10;
+unsigned const int R3 = 11;
 
 // Assign limit switch pins
 unsigned const int ls1 = 22;
@@ -115,7 +115,7 @@ void check_occupied(const int lot[]) {
   StaticJsonDocument<500> doc;
   boolean occupied;
   
-  // Ultrasonic sensor segment (occupancy)
+  // Ultrasonic sensor segment (occupancy) 
   digitalWrite(lot[1], LOW);           // Clears the trigPin
   delayMicroseconds(2);
   digitalWrite(lot[1], HIGH);          // Sets the trigPin on HIGH state for 10 micro seconds
