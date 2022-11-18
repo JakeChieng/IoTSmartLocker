@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<title>Member Login</title>
+	<title>Create your Account</title>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 <!--===============================================================================================-->
@@ -22,47 +22,64 @@
 <!--===============================================================================================-->
 </head>
 <body>
-
+    {% for message in get_flashed_messages() %}
+<h2>{{ message }}</h2>
+{% endfor %} 
 	<div class="contact1">
 		<div class="container-contact1">
 			<div class="contact1-pic js-tilt" data-tilt>
 				<img src="{{ url_for('static', filename='img/logo.png') }}" alt="Neko Neko Nyaa logo" />
 			</div>
-				
-				<form class="contact1-form validate-form" action="login" method="POST">
-					<span class="contact1-form-title">
-						Member Login
-					</span>
 
-					<div class="wrap-input1 validate-input" data-validate = "Valid email is required: ex@abc.xyz">
-						<input class="input1" type="text" name="uname" placeholder="Email">
-						<span class="shadow-input1"></span>
-					</div>
-					
-					<div class="wrap-input1 validate-input" data-validate = "Password is required: ex@abc.xyz">
-						<input class="input1" type="text" name="pword" placeholder="Password">
-						<span class="shadow-input1"></span>
-					</div>
-					<div class="container-contact1-form-btn">
-						<button class="contact1-form-btn" type="submit">
-							<span>
-								Login
-								<i class="fa fa-long-arrow-right" aria-hidden="true"></i>
-							</span>
-						</button>
-					</div>
+			<form class="contact1-form validate-form" action="registration" method="POST">
+				<span class="contact1-form-title">
+					Create your Account
+				</span>
+				
+				<span class="contact1-form-title">
+					{{ msg }}
+				</span>
+				
+				<div class="wrap-input1 validate-input" data-validate = "Valid email is required: ex@abc.xyz">
+					<input class="input1" type="text" name="email" placeholder="Email">
+					<span class="shadow-input1"></span>
+				</div>
+				
+				<div class="wrap-input1 validate-input" data-validate = "Password is required: ex@abc.xyz">
+					<input class="input1" type="text" name="pword" placeholder="Password">
+					<span class="shadow-input1"></span>
+				</div>
+				
+				<div class="wrap-input1 validate-input" data-validate = "Name is required">
+					<input class="input1" type="text" name="name" placeholder="Name">
+					<span class="shadow-input1"></span>
+				</div>
 
-					<div class="text-center p-t-136">
-						<a class="txt2" href="registration">
-							Create your Account
-							<i class="fa fa-long-arrow-right m-l-5" aria-hidden="true"></i>
-						</a>
-					</div>
-				</form>
-				
-				
+				<div class="wrap-input1 validate-input" data-validate = "Phone number is required">
+					<input class="input1" type="text" name="phone" placeholder="Phone Number">
+					<span class="shadow-input1"></span>
+				</div>
+
+				<div class="wrap-input1 validate-input" data-validate = "Address is required">
+					<textarea class="input1" name="address" placeholder="Address"></textarea>
+					<span class="shadow-input1"></span>
+				</div>
+
+				<div class="container-contact1-form-btn">
+					<button class="contact1-form-btn" type="submit">
+						<span>
+							Sign Up
+							<i class="fa fa-long-arrow-right" aria-hidden="true"></i>
+						</span>
+					</button>
+				</div>
+			</form>
 		</div>
 	</div>
+
+
+
+
 
 </body>
 </html>
