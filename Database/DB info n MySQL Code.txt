@@ -1,16 +1,18 @@
 mysql -u root -p
 password:221013
 ------
+ja@gmail.com pw:@4qwerds
+------
 CREATE DATABASE Membership  default character set utf8mb4;
 USE Membership;
 
 CREATE TABLE Customers(
 	customer_id int NOT NULL AUTO_INCREMENT ,
 	customer_name char(50) NOT NULL,
-	phone int NOT NULL,
+	phone Varchar(15) NOT NULL,
 	address varchar(255),
 	email varchar(100) NOT NULL UNIQUE,
-	password varchar(100) NOT NULL,
+	password varchar(120) NOT NULL,
 	PRIMARY KEY (customer_id)          
 );
 CREATE TABLE Products(
@@ -54,9 +56,10 @@ CREATE TABLE Orderdetails(
 
 # VALUES for testing
 INSERT INTO Customers VALUES
-  (1, 'james', 010389346,'kuching','ja@gmail.com',"b'\xfc\xcbm\x83C\x13[e'"),
-  (2, 'nana', 017234567,'BDC' ,'nana@mail.com',"b'D\n\xa5\xd3/\xecVv\xfa\xf7{\x7f['" ),
-  (3, 'gong', 012345678, 'Taman Orchid','gg@outlook.com',"b'\xfc\xcbm\x83C\x13[e'" );
+  (1, 'james', '010389346','kuching','ja@gmail.com',"pbkdf2:sha256:260000$hblvfjUSzVdinHpO$102fef250529cc7c3763a79bb2f533a7c6f9461654e9a1d8f437378600f635fa"),
+  (2, 'nana', '017234567','BDC' ,'nana@mail.com',"pbkdf2:sha256:260000$3CUnAUWiSBWRDArc$534430f62ca64d56fb7a47e55a642f628f25114742262b83609e1f679c28a6e4" ),
+  (3, 'gong', '012345678', 'Taman Orchid','gg@outlook.com',"pbkdf2:sha256:260000$jfn3Mgcw5cdp1Zl3$db60d4905f66893a36246e534944bda7096a5f7d35c2cb4271557f19b58d430e" );
+INSERT INTO Customers (customer_name,phone,address,email,password) VALUES ('fourth','0178945612','somewhere','ftiid@mail.my',"pbkdf2:sha256:260000$hblvfjUSzVdinHpO$102fef250529cc7c3763a79bb2f533a7c6f9461654e9a1d8f437378600f635fa");
   
 INSERT INTO Products VALUES
   (1, 'Yu-Gi-Oh! card'),
@@ -71,17 +74,26 @@ INSERT INTO Orders VALUES
 INSERT INTO Orderdetails VALUES
   (1,1,1,1,1,' '),
   (1,2,1,2,1,' ');
+  
 -------
-SELECT password FROM Customers
+SELECT * FROM Customers;
 WHERE email = 'ja@gmail.com';
 
 DROP DATABASE Membership;
+ja@gmail.com pw:@4qwerds
+
+DROP table Orderdetails;
+DROP table Orders;
+DROP table Locker;
+DROP table Products;
+DROP table Customers;
 
 use mysql;
-
+DESCRIBE Customers;
 show tables;
 
   show table Orderdetails;
+  USE Membership;
   SELECT * FROM Customers;
   SELECT * FROM Orderdetails JOIN Orders ON Orderdetails.order_id=Orders.order_id;
   SELECT * FROM Orderdetails JOIN Products ON Orderdetails.product_id=Products.product_id;
