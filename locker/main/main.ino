@@ -2,7 +2,7 @@
 #include <ArduinoJson.h>
 
 #define LOCKER "A"
-#define OCCTHRESHOLD 10
+#define OCCTHRESHOLD 30
 
 // Assign ultrasonic pins
 unsigned const int trig1 = 36;
@@ -123,7 +123,7 @@ void check_occupied(const int lot[]) {
   digitalWrite(lot[1], LOW);
 
   long duration = pulseIn(lot[2], HIGH);    // Reads the echoPin, returns the sound wave travel time in microseconds
-  int occDistance = duration * 0.034 / 2;    // Calculating the distance
+  float occDistance = duration * 0.034 / 2;    // Calculating the distance
   Serial.println(occDistance);
 
   if (occDistance < OCCTHRESHOLD) {
