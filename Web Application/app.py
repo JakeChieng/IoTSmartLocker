@@ -1,12 +1,13 @@
 import mysql.connector
-from flask import Flask, request, render_template, redirect, url_for
+from flask import Flask, request, render_template, redirect, flash, url_for
 from datetime import datetime
 import time  #Import time library
+import re
 from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTClient
 from werkzeug.security import generate_password_hash, check_password_hash
 #aws ec2 stuff
 
-conn = mysql.connector.connect(user="root", password="221013", host="localhost", database="Membership1")
+conn = mysql.connector.connect(user="root", password="221013", host="localhost", database="Membership")
 
 if conn:
     print("Connection successful")
@@ -27,9 +28,14 @@ def test():
     return render_template("login.html")
 
 @app.route("/testp")
-def othing():
+def testp():
     #change to login
     return render_template("payment.html")
+
+@app.route("/testr")
+def testr():
+    #change to login
+    return render_template("registration.html")
 
 #incomplete
 @app.route("/login", methods = ["POST"])
@@ -46,6 +52,7 @@ def login():
     
     if check_password_hash(encryptPass[0], pw) :
         print("password is correct")
+        flash('You were successfully logged in')
         order = "SELECT * FROM Products"
         cursor.execute(order)
         product = cursor.fetchall()
@@ -54,6 +61,32 @@ def login():
         print("password is not correct")
         return render_template("login.html",msg="no" )
     return redirect(url_for('test'))
+
+@app.route("/registration", methods = ["POST"])
+def registration():
+
+    email = request.form["email"]
+    pw = request.form["pword"]
+    name = request.form["name"]
+    phone = request.form["phone"]
+    address = request.form["address"]
+    hashpw = generate_password_hash(pw)    
+    if(re.fullmatch(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', email)):
+    
+        if re.fullmatch(r'[A-Za-z0-9@#$%^&+=]{8,}', pw ):
+            insertquery = "INSERT INTO Customers (customer_name,phone,address,email,password) VALUES (%s,%s,%s,%s,%s)"
+            try:
+                affected_count = cursor.execute(insertquery, (name,phone,address,email,hashpw))
+                conn.commit()
+                return "account successfully created"
+            except:
+                return "failed to register"
+    
+        else:
+            return "Invalid Password, password is At least 8 characters"
+    else:
+        return "Invalid Email"		
+
 
 @app.route("/order_form")
 #show list of products
