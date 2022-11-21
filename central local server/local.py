@@ -34,7 +34,7 @@ def send_cloud():
 
     # Gather information from all lockers
     query = """
-    SELECT locker, lot, occupied, closed FROM Lockers
+    SELECT locker, lot, occupied FROM Lockers
     """
 
     myCursor = conn.cursor()
@@ -44,12 +44,11 @@ def send_cloud():
     status = []
 
     for result in results:
-        locker, lot, occupied, closed = result
+        locker, lot, occupied = result
         temp = {
             "Locker": locker,
             "Lot": lot,
-            "Occupied": False if occupied != 0 else True,
-            "Closed": False if closed != 0 else True
+            "Occupied": False if occupied != 0 else True
         }
         status.append(temp)
 
@@ -87,7 +86,6 @@ def serial_msg(dict_json):
     locker = dict_json["Locker"]
     lot = dict_json["Lot"]
     occupied = dict_json["Occupied"]
-    closed = dict_json["Closed"]
 
     conn = mariadb.connect(
         host="localhost",
@@ -99,23 +97,23 @@ def serial_msg(dict_json):
     # Check whether status sent from microcontroller is the same as in DB
     # If yes, then don't send mqtt and vice versa
 
-    query = """SELECT occupied, closed FROM Lockers WHERE locker=%s AND lot=%s"""
+    query = """SELECT occupied FROM Lockers WHERE locker=%s AND lot=%s"""
 
     data = (locker, lot)
 
     with conn:
         myCursor = conn.cursor()
         myCursor.execute(query, data)
-        currentOccupied, currentClosed = myCursor.fetchone()
+        currentOccupied = myCursor.fetchone()
 
-        if currentOccupied == occupied and currentClosed == closed:
+        if currentOccupied == occupied:
             # Don't do anything if matching database information
             pass
         else:    
-            query = """UPDATE Lockers SET occupied=%s, closed=%s
+            query = """UPDATE Lockers SET occupied=%s
             WHERE locker=%s AND lot=%s"""
 
-            data = (occupied, closed, locker, lot)
+            data = (occupied, locker, lot)
 
             myCursor.execute(query, data)
             conn.commit()
@@ -133,7 +131,7 @@ if __name__ == '__main__':
 
     while True:
         if ser.in_waiting > 0:
-            data = ser.readline().decode("utf-8")
+            data = ser.readline().decode("ISO-8859-1")
             try: 
                 dict_json = json.loads(data)
                 serial_msg(dict_json)
