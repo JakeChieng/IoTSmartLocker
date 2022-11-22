@@ -21,10 +21,7 @@
 					<table class="table">
 						<thead>
 							<tr>
-								<th>Product</th>
-								<th>Locker</th>
-								<th>Quantity</th>
-								<th>Remark</th>
+								<th>Order ID</th>
 								<th>Order Date</th>
 								<th>Status</th>
 								<th>Payment Method</th>
@@ -34,14 +31,9 @@
 							</tr>
 						</thead>
 						<tbody>
-							<tr>
-								<td>{{name}}</td>
-							{% for detail in order %}
-								<td>{{detail[2]}}</td>
-								<td>{{detail[3]}}</td>
-								<td>{{detail[5]}}</td>
-							{% endfor %}
 							{% for item in data %}
+							<tr>
+								<td>{{item[0]}}</td>
 								<td>{{item[2]}}</td>
 								<td>{{item[3]}}</td>
 								<td>{{item[4]}}</td>
@@ -55,15 +47,12 @@
 									{% endif %}
 								</td>
 								<td>
-									{% if item[3] == 2 %}
-									<!-- might implement direct device communication with raspi -->
-										<form class="button" action="open_locker" method="POST">
-											<button type="submit" name="pup" value="{{item[0]}}">Pick Up</button>
-										</form>
-									{% endif %}
+									<form class="button" action="order_details" method="POST">
+										<button type="submit" name="oid" value="{{item[0]}}">Details</button>
+									</form>
 								</td>
-							{% endfor %}
 							</tr>
+							{% endfor %}
 						</tbody>
 					</table>
 				</div>

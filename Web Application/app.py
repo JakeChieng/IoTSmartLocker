@@ -52,7 +52,6 @@ def login():
     
     if check_password_hash(encryptPass[0], pw) :
         print("password is correct")
-        flash('You were successfully logged in')
         order = "SELECT * FROM Products"
         cursor.execute(order)
         product = cursor.fetchall()
@@ -139,21 +138,28 @@ def customer_orders():
     orders = "SELECT * FROM Orders WHERE customer_id = %s"
     cursor.execute(orders, ('1', ))
     result = cursor.fetchall()
-    #get order details based on customer id
-    orders = "SELECT * FROM Orderdetails WHERE customer_id = %s"
-    cursor.execute(orders, ('1', ))
-    details = cursor.fetchall()
-    #get order id based on customer id
-    orders = "SELECT product_id FROM Orderdetails WHERE customer_id = %s"
-    cursor.execute(orders, ('1', ))
+    return render_template("customer_orders.html", data = result)
+    
+@app.route("/order_details", methods = ["POST"])
+#get details of order
+def order_details():
+    #get order id
+    oid = request.form["oid"]
+    #get details of order id
+    details = "SELECT * FROM Orderdetails WHERE order_id = %s"
+    cursor.execute(details, (oid, ))
+    result = cursor.fetchall()
+    #get product_id based on order id
+    details = "SELECT product_id FROM Orderdetails WHERE order_id = %s"
+    cursor.execute(details, (oid, ))
     pid = cursor.fetchone()
     temp = cursor.fetchall()
     #get product name based on product id
     orders = "SELECT product_name FROM Products WHERE product_id = %s"
-    cursor.execute(orders, (pid, ))
+    cursor.execute(orders, (pid[0], ))
     product = cursor.fetchone()
     temp = cursor.fetchall()
-    return render_template("customer_orders.html", data = result, order = details, name = product)
+    return render_template("order_details.html", data = result, name = product[0])
     
 @app.route("/open_locker", methods = ["POST"])
 #open locker
@@ -177,23 +183,6 @@ def open_locker():
     cursor.execute(locker_id, result)
     conn.commit()
     return redirect(url_for('customer_orders'))
-    
-@app.route("/order_details", methods = ["POST"])
-#get details of order
-def order_details():
-    #get order id
-    oid = request.form["oid"]
-    #get details of order id
-    details = "SELECT * FROM Orderdetails WHERE order_id = %s"
-    cursor.execute(details, (oid, ))
-    result = cursor.fetchone()
-    temp = cursor.fetchall()
-    #get amount to pay for order id
-    order = "SELECT amount FROM Orders WHERE order_id = %s"
-    cursor.execute(order, (oid, ))
-    amount = cursor.fetchone()
-    temp = cursor.fetchall()
-    return render_template("order_details.html", data = result, order = amount)
 
 @app.route("/order")
 #return all orders in database
