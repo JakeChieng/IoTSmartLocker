@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<title>Design</title>
+		<title>Place Order</title>
 		<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
 		<link rel="stylesheet" href="{{ url_for('static', filename='style/style.css') }}">
 	</head>
@@ -10,7 +10,6 @@
 			<div class="row">
 				<div class="col-md-12 nopadding border">
 					<ul>
-						<a href="index"><li>Home</li></a>
 						<a href="order_form"><li>Place Order</li></a>
 						<a href="customer_orders"><li>Orders</li></a>
 					</ul>
@@ -25,18 +24,17 @@
 							<tbody class="form">
 								<tr>
 									<th><label for="qty">Quantity: </label></th>
-									<td><input type="number" name="qty" /></td>
+									<td><input type="number" name="qty" min="1" /></td>
 								</tr>
 								<tr>
 									<th><label for="remark">Remark: </label></th>
-									<td><textarea name="remark" rows="5" cols="50"></textarea></td>
+									<td><textarea name="remark" rows="5"></textarea></td>
 								</tr>
 								<tr>
 									<th><label for="item">Item: </label></th>
 									<td>
 										<select name="item">
 											{% for item in data %}
-											<option value="{{item[0]}}">{{item[0]}}</option>
 											<option value="{{item[1]}}">{{item[1]}}</option>
 											{% endfor %}
 										</select>
@@ -47,9 +45,12 @@
 									<td>
 										<select name="payment_method">
 											<option value="boost">Boost</option>
-											<option value="spay">Sarawak Pay</option>
 										</select>
 									</td>
+								</tr>
+								<tr>
+									<th></th>
+									<td class="button_left"><button type="submit">Submit</button></td>
 								</tr>
 							</tbody>
 						</table>

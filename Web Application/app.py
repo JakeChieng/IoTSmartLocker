@@ -24,20 +24,33 @@ def nothing():
     #change to login
     return redirect(url_for('test'))
 
-@app.route("/test")
-def test():
+@app.route("/login_interface")
+def login_interface():
     #change to login
     return render_template("login.html")
 
-@app.route("/testp")
-def testp():
-    #change to login
+@app.route("/payment_interface")
+def payment_interface():
+    #get order id
+    ost = request.form["ost"]
+    #update order status to paid in Orders
+    order = "UPDATE Orders SET status = 1 WHERE order_id = %s"
+    cursor.execute(order, (ost, ))
+    #update order status to paid in Orderdetails
+    order = "UPDATE Orderdetails SET status = 1 WHERE order_id = %s"
+    cursor.execute(order, (ost, ))
+    conn.commit()
     return render_template("payment.html")
 
-@app.route("/testr")
-def testr():
+@app.route("/registration_interface")
+def registration_interface():
     #change to login
     return render_template("registration.html")
+
+@app.route("/shopkeeper")
+def shopkeeper():
+    #change to shopkeeper
+    return redirect(url_for('get_orders'))
 
 #incomplete
 @app.route("/login", methods = ["POST"])
