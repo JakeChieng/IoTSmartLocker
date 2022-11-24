@@ -17,6 +17,8 @@ else:
     
 app = Flask(__name__)
 
+cid = 0
+
 @app.route("/")
 def nothing():
     #change to login
@@ -41,6 +43,7 @@ def testr():
 @app.route("/login", methods = ["POST"])
 def login():
 
+    global cid;
     email = request.form["uname"]
     pw = request.form["pword"]
 
@@ -52,6 +55,11 @@ def login():
     
     if check_password_hash(encryptPass[0], pw) :
         print("password is correct")
+        order = "SELECT customer_id FROM Customers WHERE email = %s"
+        cursor.execute(order, (email,))
+        cid = cursor.fetchone()
+        temp = cursor.fetchall()
+        cid = cid[0]
         order = "SELECT * FROM Products"
         cursor.execute(order)
         product = cursor.fetchall()
@@ -103,22 +111,15 @@ def place_order():
     pay = request.form["payment_method"]
     #get remark
     rmk = request.form["remark"]
-    #!!!!!!!!!!IMPORTANT!!!!!!!!!!
-    #implement customer id after membership system is complete
-    #!!!!!!!!!!IMPORTANT!!!!!!!!!!
-    order = "INSERT INTO Orders (customer_id, order_date, status, payment_method, amount, remark) VALUES order_id = (1, %s, 0, %s, NULL, %s)"
-    cursor.execute(order, (today, pay, rmk, ))
+    #store order in database
+    order = "INSERT INTO Orders (customer_id, order_date, status, payment_method, amount, remark) VALUES order_id = (%s, %s, 0, %s, NULL, %s)"
+    cursor.execute(order, (cid, today, pay, rmk, ))
     last_id = "SELECT LAST_INSERT_ID()"
     cursor.execute(last_id)
     oid = cursor.fetchone()
     temp = cursor.fetchall()
     itm = request.form["item"]
     qty = request.form["qty"]
-    #might need something to correlate order_ids across Orders and Orderdetails
-    #order = "SELECT order_id FROM Orders WHERE "
-    #cursor.execute(order, (itm, ))
-    #oid = cursor.fetchone()
-    #temp = cursor.fetchall()
     order = "SELECT product_id FROM Products WHERE product_name = %s"
     cursor.execute(order, (itm, ))
     pid = cursor.fetchone()
@@ -131,12 +132,9 @@ def place_order():
 @app.route("/customer_orders")
 #check orders
 def customer_orders():
-    #!!!!!!!!!!IMPORTANT!!!!!!!!!!
-    #implement customer id after membership system is complete
-    #!!!!!!!!!!IMPORTANT!!!!!!!!!!
     #get orders based on customer id
     orders = "SELECT * FROM Orders WHERE customer_id = %s"
-    cursor.execute(orders, ('1', ))
+    cursor.execute(orders, (cid, ))
     result = cursor.fetchall()
     return render_template("customer_orders.html", data = result)
     
