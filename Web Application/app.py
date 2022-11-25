@@ -22,14 +22,14 @@ cid = 0
 @app.route("/")
 def nothing():
     #change to login
-    return redirect(url_for('test'))
+    return redirect(url_for('login_interface'))
 
 @app.route("/login_interface")
 def login_interface():
     #change to login
     return render_template("login.html")
 
-@app.route("/payment_interface")
+@app.route("/payment_interface", methods = ["POST"])
 def payment_interface():
     #get order id
     ost = request.form["ost"]
@@ -125,19 +125,21 @@ def place_order():
     #get remark
     rmk = request.form["remark"]
     #store order in database
-    order = "INSERT INTO Orders (customer_id, order_date, status, payment_method, amount, remark) VALUES order_id = (%s, %s, 0, %s, NULL, %s)"
+    order = "INSERT INTO Orders (customer_id, order_date, status, payment_method, amount, remark) VALUES (%s, %s, 0, %s, NULL, %s)"
     cursor.execute(order, (cid, today, pay, rmk, ))
     last_id = "SELECT LAST_INSERT_ID()"
     cursor.execute(last_id)
     oid = cursor.fetchone()
+    oid = oid[0]
     temp = cursor.fetchall()
     itm = request.form["item"]
     qty = request.form["qty"]
     order = "SELECT product_id FROM Products WHERE product_name = %s"
     cursor.execute(order, (itm, ))
     pid = cursor.fetchone()
+    pid = pid[0]
     temp = cursor.fetchall()
-    order = "INSERT INTO Orderdetails (order_id, product_id, locker_id, quantityOrdered, status, remark) VALUES order_id = (%s, %s, -1, %s, 0, %s)"
+    order = "INSERT INTO Orderdetails (order_id, product_id, locker_id, quantityOrdered, status, remark) VALUES (%s, %s, -1, %s, 0, %s)"
     cursor.execute(order, (oid, pid, qty, rmk, ))
     conn.commit()
     return render_template("order_form.html")
@@ -254,7 +256,7 @@ def details():
     temp = cursor.fetchall()
     return render_template("details.html", data = result, locker = alloc, order = amount)
     
-@app.route("/locker", methods = ["POST"])
+@app.route("/set_locker", methods = ["POST"])
 #assign locker to order
 def set_locker():
     #get locker id
@@ -288,6 +290,8 @@ def set_amount():
     #set the amount to be paid for an order
     order = "UPDATE Orders SET amount = %s WHERE order_id = %s"
     cursor.execute(order, (amt, oid, ))
+    order = "UPDATE Orders SET status = 1 WHERE order_id = %s"
+    cursor.execute(order, (oid, ))
     order = "UPDATE Orderdetails SET status = 1 WHERE order_id = %s"
     cursor.execute(order, (oid, ))
     conn.commit()

@@ -43,7 +43,7 @@
 								<td></td>
 							</tr>
 							{% if data[4] == 1 %}		
-							<form class="button" action="locker" method="POST">
+							<form class="button" action="set_locker" method="POST">
 								<tr>
 									<th>Change Locker</th>
 									<td>ID: 
@@ -70,8 +70,8 @@
 							<form class="button" action="amount" method="POST">
 							<tr>
 								<th><label for="amt">Amount: </label></th>
-								<td><input type="number" name="amt" value="{{order[5]}}"/></td>
-								<td><button type="submit" name="amt">Change</button></td>
+								<td><input type="number" name="amt" /></td>
+								<td><button type="submit" name="oid" value="{{data[0]}}">Change</button></td>
 							</tr>
 							</form>
 							<tr>
