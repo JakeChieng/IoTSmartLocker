@@ -22,7 +22,7 @@ cid = 0
 @app.route("/")
 def nothing():
     #change to login
-    return redirect(url_for('test'))
+    return redirect(url_for('login_interface'))
 
 @app.route("/login_interface")
 def login_interface():
