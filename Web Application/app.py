@@ -3,9 +3,28 @@ from flask import Flask, request, render_template, redirect, flash, url_for
 from datetime import datetime
 import time  #Import time library
 import re
+import json
 from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTClient
 from werkzeug.security import generate_password_hash, check_password_hash
-#aws ec2 stuff
+
+# aws ec2 stuff
+AWS_EDGE_TOPIC = "smartlocker/edge"
+AWS_CLOUD_TOPIC = "smartlocker/cloud"
+AWS_INFO_TOPIC = "smartlocker/info"
+
+# AWS IoT certificate based connection
+myMQTTClient = AWSIoTMQTTClient("Cloud Server")
+# myMQTTClient.configureEndpoint("YOUR.ENDPOINT", 8883)
+myMQTTClient.configureEndpoint("a6gvbxmq08z2y-ats.iot.ap-southeast-1.amazonaws.com", 8883)
+myMQTTClient.configureCredentials("/home/ubuntu/certEc2/AmazonRootCA1.pem", "/home/ubuntu/certEc2/bd76d6f21c0792f46f890d595e999d2443a00687a90fc056949f1ed6b2b2bef9-private.pem.key", "/home/ubuntu/certEc2/bd76d6f21c0792f46f890d595e999d2443a00687a90fc056949f1ed6b2b2bef9-certificate.pem.crt")
+myMQTTClient.configureOfflinePublishQueueing(-1)  # Infinite offline Publish queueing
+myMQTTClient.configureDrainingFrequency(2)  # Draining: 2 Hz
+myMQTTClient.configureConnectDisconnectTimeout(10)  # 10 sec
+myMQTTClient.configureMQTTOperationTimeout(5)  # 5 sec
+
+#connect and publish
+myMQTTClient.connect()
+myMQTTClient.publish(AWS_INFO_TOPIC, "connected", 0)
 
 conn = mysql.connector.connect(user="root", password="221013", host="localhost", database="Membership")
 
@@ -18,6 +37,24 @@ else:
 app = Flask(__name__)
 
 cid = 0
+
+# Message handler when receiving MQTT message from locker
+# Update locker status in database
+def msg_callback(client, userdata, message):
+    try: 
+        msg = json.loads(message.payload)
+        shop = msg["Shop"]
+        status = msg["Status"]
+
+        for s in status:
+            query = """
+            UPDATE Locker SET occupied = %s WHERE shop = %s AND locker = %s AND lot = %s
+            """
+            cursor.execute(query, (True if s["Occupied"] == True else False, s["Shop"], s["Locker"], msg["Lot"], ))
+            conn.commit()
+    except json.JSONDecodeError as e:
+        print("JSON:", e)
+    
 
 @app.route("/")
 def nothing():
@@ -190,6 +227,34 @@ def open_locker():
     cursor.execute(locker, (pup, ))
     result = cursor.fetchone()
     temp = cursor.fetchall()
+
+    # Send mqtt msg to unlock locker
+    # Get shop, lot, locker info from database
+    shopQuery = """
+    SELECT shop FROM Locker WHERE locker_id = %s
+    """
+    cursor.execute(shopQuery, (result, ))
+    shop = cursor.fetchone()
+    commandList = []
+    for  t in temp:
+        find = """
+        SELECT locker, lot FROM Locker WHERE locker_id = %s
+        """
+        cursor.execute(find, (t, ))
+        locker, lot = cursor.fetchone()
+        temp_com = {
+            "Locker": locker,
+            "Lot": lot,
+            "Command": "Unlock"
+        }
+        commandList.append(temp_com)
+
+    dict = {"Shop": shop, "CommandList": commandList}
+    dict_json = json.dumps(dict)
+
+    myMQTTClient.publish(AWS_CLOUD_TOPIC, dict_json, 0)
+
+    # NOT NEEDED
     #!!!!!!!!!! might be changed in favor of sensor !!!!!!!!!!
     #set locker assigned to picked up order to unoccupied
     locker_id = "UPDATE Locker SET occupied = 0, closed = 0 WHERE locker_id = %s"
@@ -273,6 +338,7 @@ def set_locker():
         #set order's assigned locker 
         alloc = "UPDATE Orderdetails SET locker_id = %s WHERE order_id = %s"
         cursor.execute(alloc, (slo, oid, ))
+        # NOT NEEDED
         #!!!!!!!!!! might be deleted in favor of sensor !!!!!!!!!!
         #set locker's occupied and closed status
         alloc = "UPDATE Locker SET occupied = 1, closed = 1 WHERE locker_id = %s"
@@ -314,12 +380,15 @@ def picked_up():
     cursor.execute(locker, (pup, ))
     result = cursor.fetchone()
     temp = cursor.fetchall()
+    # NOT NEEDED
     #!!!!!!!!!! might be changed in favor of sensor !!!!!!!!!!
     #set locker assigned to picked up order to unoccupied
     locker_id = "UPDATE Locker SET occupied = 0, closed = 0 WHERE locker_id = %s"
     cursor.execute(locker_id, result)
     conn.commit()
     return redirect(url_for('get_orders'))
+
+myMQTTClient.subscribe(AWS_EDGE_TOPIC, 0, msg_callback)
 
 if __name__ == "__main__":
     app.run()
