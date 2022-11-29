@@ -16,7 +16,7 @@ AWS_INFO_TOPIC = "smartlocker/info"
 myMQTTClient = AWSIoTMQTTClient("Cloud Server")
 # myMQTTClient.configureEndpoint("YOUR.ENDPOINT", 8883)
 myMQTTClient.configureEndpoint("a6gvbxmq08z2y-ats.iot.ap-southeast-1.amazonaws.com", 8883)
-myMQTTClient.configureCredentials("/home/ubuntu/certEc2/AmazonRootCA1.pem", "/home/ubuntu/certEc2/bd76d6f21c0792f46f890d595e999d2443a00687a90fc056949f1ed6b2b2bef9-private.pem.key", "/home/ubuntu/certEc2/bd76d6f21c0792f46f890d595e999d2443a00687a90fc056949f1ed6b2b2bef9-certificate.pem.crt")
+myMQTTClient.configureCredentials("/home/ubuntu/certEc2/AmazonRootCA1.pem", "/home/ubuntu/certEc2/0f2deb2a9e43840ae73fb949f9ed54e437cac1f3d45323efe2fcfcee4692afe4-private.pem.key", "/home/ubuntu/certEc2/0f2deb2a9e43840ae73fb949f9ed54e437cac1f3d45323efe2fcfcee4692afe4-certificate.pem.crt")
 myMQTTClient.configureOfflinePublishQueueing(-1)  # Infinite offline Publish queueing
 myMQTTClient.configureDrainingFrequency(2)  # Draining: 2 Hz
 myMQTTClient.configureConnectDisconnectTimeout(10)  # 10 sec
