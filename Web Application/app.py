@@ -286,7 +286,7 @@ def force_open():
     myMQTTClient.publish(AWS_CLOUD_TOPIC, dict_json, 0)
 
     conn.commit()
-    return redirect(url_for('locker'))
+    return redirect(url_for('get_lockers'))
 
 @app.route("/order")
 #return all orders in database
