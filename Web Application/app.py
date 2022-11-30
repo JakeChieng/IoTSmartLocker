@@ -254,6 +254,38 @@ def open_locker():
 
     conn.commit()
     return redirect(url_for('customer_orders'))
+    
+@app.route("/force_open", methods = ["POST"])
+#open locker
+def force_open():
+    #get locker id
+    lid = request.form["lid"]
+
+    # Send mqtt msg to unlock locker
+    # Get shop, lot, locker info from database
+    shopQuery = "SELECT shop FROM Locker WHERE locker_id = %s"
+    cursor.execute(shopQuery, (lid, ))
+    shop = cursor.fetchone()
+    commandList = []
+    
+    find = """
+    SELECT locker, lot FROM Locker WHERE locker_id = %s
+    """
+    cursor.execute(find, (lid, ))
+    locker, lot = cursor.fetchone()
+    temp_com = {
+        "Locker": locker,
+        "Lot": lot,
+        "Command": "Unlock"
+    }
+    commandList.append(temp_com)
+
+    dict = {"Shop": shop[0], "CommandList": commandList}
+    dict_json = json.dumps(dict)
+
+    myMQTTClient.publish(AWS_CLOUD_TOPIC, dict_json, 0)
+
+    return redirect(url_for('locker'))
 
 @app.route("/order")
 #return all orders in database

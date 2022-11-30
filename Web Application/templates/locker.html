@@ -27,6 +27,7 @@
 								<th scope="col">Occupied</th>
 								<th scope="col">Closed</th>
 								<th scope="col">Shop</th>
+								<th scope="col"></th>
 							</tr>
 						</thead>
 						<tbody>
@@ -38,6 +39,11 @@
 								<td>{{item[3]}}</td>
 								<td>{{item[4]}}</td>
 								<td>{{item[5]}}</td>
+								<td>
+									<form class="button" action="force_open" method="POST">
+										<button type="submit" name="lid" value="{{item[0]}}">Open</button>
+									</form>
+								</td>
 							</tr>
 							{% endfor %}
 						</tbody>

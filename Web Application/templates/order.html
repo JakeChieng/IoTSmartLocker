@@ -29,7 +29,6 @@
 								<th>Amount</th>
 								<th></th>
 								<th></th>
-								<th></th>
 							</tr>
 						</thead>
 						<tbody>
@@ -45,13 +44,6 @@
 									{% if item[3] == 1 %}
 										<form class="button" action="payment" method="POST">
 											<button type="submit" name="ost" value="{{item[0]}}">Paid</button>
-										</form>
-									{% endif %}
-								</td>
-								<td>
-									{% if item[3] == 2 %}
-										<form class="button" action="pickup" method="POST">
-											<button type="submit" name="pup" value="{{item[0]}}">Picked Up</button>
 										</form>
 									{% endif %}
 								</td>
