@@ -50,7 +50,7 @@ def msg_callback(client, userdata, message):
             query = """
             UPDATE Locker SET occupied = %s WHERE shop = %s AND locker = %s AND lot = %s
             """
-            cursor.execute(query, (True if s["Occupied"] == True else False, s["Shop"], s["Locker"], msg["Lot"], ))
+            cursor.execute(query, (1 if s["Occupied"] == True else 0, s["Shop"], s["Locker"], msg["Lot"], ))
             conn.commit()
     except json.JSONDecodeError as e:
         print("JSON:", e)
@@ -230,35 +230,28 @@ def open_locker():
 
     # Send mqtt msg to unlock locker
     # Get shop, lot, locker info from database
-    shopQuery = """
-    SELECT shop FROM Locker WHERE locker_id = %s
-    """
-    cursor.execute(shopQuery, (result, ))
+    shopQuery = "SELECT shop FROM Locker WHERE locker_id = %s"
+    cursor.execute(shopQuery, (result[0], ))
     shop = cursor.fetchone()
     commandList = []
-    for  t in temp:
-        find = """
-        SELECT locker, lot FROM Locker WHERE locker_id = %s
-        """
-        cursor.execute(find, (t, ))
-        locker, lot = cursor.fetchone()
-        temp_com = {
-            "Locker": locker,
-            "Lot": lot,
-            "Command": "Unlock"
-        }
-        commandList.append(temp_com)
+    
+    find = """
+    SELECT locker, lot FROM Locker WHERE locker_id = %s
+    """
+    cursor.execute(find, (result[0], ))
+    locker, lot = cursor.fetchone()
+    temp_com = {
+        "Locker": locker,
+        "Lot": lot,
+        "Command": "Unlock"
+    }
+    commandList.append(temp_com)
 
-    dict = {"Shop": shop, "CommandList": commandList}
+    dict = {"Shop": shop[0], "CommandList": commandList}
     dict_json = json.dumps(dict)
 
     myMQTTClient.publish(AWS_CLOUD_TOPIC, dict_json, 0)
 
-    # NOT NEEDED
-    #!!!!!!!!!! might be changed in favor of sensor !!!!!!!!!!
-    #set locker assigned to picked up order to unoccupied
-    locker_id = "UPDATE Locker SET occupied = 0, closed = 0 WHERE locker_id = %s"
-    cursor.execute(locker_id, result)
     conn.commit()
     return redirect(url_for('customer_orders'))
 
@@ -338,11 +331,6 @@ def set_locker():
         #set order's assigned locker 
         alloc = "UPDATE Orderdetails SET locker_id = %s WHERE order_id = %s"
         cursor.execute(alloc, (slo, oid, ))
-        # NOT NEEDED
-        #!!!!!!!!!! might be deleted in favor of sensor !!!!!!!!!!
-        #set locker's occupied and closed status
-        alloc = "UPDATE Locker SET occupied = 1, closed = 1 WHERE locker_id = %s"
-        cursor.execute(alloc, (slo, ))
         conn.commit()
     return redirect(url_for('get_orders'))
     
