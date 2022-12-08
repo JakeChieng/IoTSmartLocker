@@ -51,7 +51,7 @@ CREATE TABLE Orderdetails(
 	FOREIGN KEY(product_id) REFERENCES Products(product_id),
 	FOREIGN KEY(locker_id) REFERENCES Locker(locker_id)	
 );
-
+-------
 
 # VALUES for testing
 INSERT INTO Customers VALUES
@@ -65,14 +65,17 @@ INSERT INTO Products VALUES
   (2, 'figurine');
   
 INSERT INTO Locker VALUES
-  (1,'A',3,0,'Jalan Song Shop');
+ (-1, NULL, NULL ,NULL, NULL, NULL),
+  (1,'A',1,0,0,'Jalan Song shop'),
+  (2,'A',2,0,0,'Jalan Song shop'),
+  (3,'A',3,0,0,'Jalan Song shop');
   
 INSERT INTO Orders VALUES
   (1,1,'2021-02-17',1, 'boost',200,' ' );
   
 INSERT INTO Orderdetails VALUES
   (1,1,1,1,1,' '),
-  (1,2,1,2,1,' ');
+  (2,2,1,2,1,' ');
   
 -------
 SELECT * FROM Customers;
@@ -91,6 +94,7 @@ use mysql;
 DESCRIBE Customers;
 show tables;
 
+DELETE FROM Orderdetails WHERE order_id>8;
   show table Orderdetails;
   USE Membership;
   SELECT * FROM Customers;
