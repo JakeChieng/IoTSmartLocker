@@ -1,5 +1,6 @@
 #include <Servo.h>
 #include <ArduinoJson.h>
+#include <SoftwareSerial.h>
 
 #define LOCKER "A"
 #define OCCTHRESHOLD 30
@@ -20,13 +21,17 @@ unsigned const int G2 = 6;
 unsigned const int Y2 = 7;
 unsigned const int R2 = 8;
 unsigned const int G3 = 9;
-unsigned const int Y3 = 10;
-unsigned const int R3 = 11;
+unsigned const int Y3 = 12;
+unsigned const int R3 = 13;
 
 // Assign limit switch pins
 unsigned const int ls1 = 22;
 unsigned const int ls2 = 23;
 unsigned const int ls3 = 30;
+
+// Assign software serial pin for XBee
+unsigned const int ssRx = 10;
+unsigned const int ssTx = 11;
 
 // Group components based on lot
 const int lots[][7] = {
@@ -34,6 +39,8 @@ const int lots[][7] = {
   {2, trig2, echo2, ls2, G2, Y2, R2}, 
   {3, trig3, echo3, ls3, G3, Y3, R3},
 }; 
+
+SoftwareSerial mySerial(ssRx, ssTx); // RX, TX
 
 // Assign serial pins for servo controller
 unsigned const int ServoTx = 18;
@@ -69,10 +76,16 @@ void setup() {
   // Set pin mode of servo rx pin to INPUT
   pinMode(ServoTx, OUTPUT);
   pinMode(ServoRx, INPUT);
-  // Start serial for XBee (TX0, RX0 = 1, 0)
+  // Start serial
   Serial.begin(9600);
 
   while (!Serial) {
+    // wait for serial port to open
+  }
+
+  mySerial.begin(9600);
+
+  while (!mySerial) {
     // wait for serial port to XBee to open
   }
   
@@ -100,9 +113,9 @@ void setup() {
 
 void loop() {
   // Receive json input from central server
-  if (Serial.available() > 0) {
+  if (mySerial.available() > 0) {
     StaticJsonDocument<500> doc;
-    deserializeJson(doc, Serial);
+    deserializeJson(doc, mySerial);
 
     if (doc["Locker"] == LOCKER) {
       unlock_lot(lots[int(doc["Lot"]) - 1]);
@@ -145,8 +158,8 @@ void check_occupied(const int lot[]) {
   doc["Lot"] = lot[0];
   doc["Occupied"] = occupied;
 
-  serializeJson(doc, Serial);
-  Serial.println();
+  serializeJson(doc, mySerial);
+  mySerial.println();
 }
 
 void unlock_blink(const int lot[]) {
